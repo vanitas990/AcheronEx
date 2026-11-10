@@ -4,251 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#100c18">
-    <title>Palabra EX</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --text: #fff;
-            --muted: #c8c2d2;
-            --correct: #538d4e;
-            --present: #b59f3b;
-            --absent: #c44545;
-            --unused: #34313b;
-            --border: #57515f;
-            --accent: #bd70ec;
-            --accent-glow: rgba(189, 112, 236, .55);
-        }
-
-        * { box-sizing: border-box; }
-
-        html, body { min-width: 320px; min-height: 100%; }
-
-        body {
-            min-height: 100vh;
-            min-height: 100svh;
-            margin: 0;
-            overflow-x: hidden;
-            color: var(--text);
-            background: #100c18;
-            font-family: Arial, Helvetica, sans-serif;
-            isolation: isolate;
-        }
-
-        #background-video {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
-        }
-
-        .video-shade {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background: rgba(0, 0, 0, 0.6);
-            pointer-events: none;
-        }
-
-        .app {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            min-height: 100vh;
-            min-height: 100svh;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 18px 12px 190px;
-        }
-
-        h1 {
-            margin: 0 0 6px;
-            color: #e0b2ff;
-            font-size: clamp(1.8rem, 7vw, 2.5rem);
-            letter-spacing: .08em;
-            text-shadow: 0 0 16px var(--accent-glow);
-        }
-
-        .subtitle {
-            margin: 0 0 12px;
-            color: var(--muted);
-            font-size: .9rem;
-            letter-spacing: .06em;
-        }
-
-        #message-container {
-            min-height: 25px;
-            margin: 0 0 7px;
-            color: #f1d4ff;
-            font-size: .95rem;
-            font-weight: 700;
-            text-align: center;
-            text-shadow: 0 1px 8px #000;
-        }
-
-        #game-board {
-            display: grid;
-            grid-template-rows: repeat(6, 1fr);
-            gap: clamp(4px, 1.3vw, 7px);
-            width: min(100%, 370px);
-            padding: 5px;
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: clamp(4px, 1.3vw, 7px);
-        }
-
-        .tile {
-            display: flex;
-            aspect-ratio: 1;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid rgba(230, 220, 242, .4);
-            border-radius: 5px;
-            background: rgba(20, 17, 26, .58);
-            font-size: clamp(1.65rem, 8vw, 2.15rem);
-            font-weight: 800;
-            text-transform: uppercase;
-            user-select: none;
-            transition: border-color .12s, background-color .2s, box-shadow .12s;
-        }
-
-        .tile[data-state="correct"] { background: var(--correct); border-color: var(--correct); }
-        .tile[data-state="present"] { background: var(--present); border-color: var(--present); }
-        .tile[data-state="absent"] { background: var(--absent); border-color: var(--absent); }
-        .tile[data-state="active"] {
-            border-color: var(--accent);
-            box-shadow: 0 0 11px var(--accent-glow);
-            cursor: pointer;
-        }
-        .tile[data-row-active="true"] { cursor: pointer; }
-
-        button { font: inherit; }
-
-        .action-button {
-            margin-top: 13px;
-            padding: 10px 18px;
-            border: 1px solid var(--accent);
-            border-radius: 9px;
-            color: #fff;
-            background: rgba(107, 44, 139, .48);
-            box-shadow: 0 0 14px rgba(189, 112, 236, .18);
-            font-size: .95rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background .18s, transform .18s;
-        }
-        .action-button:hover { background: rgba(142, 69, 177, .76); transform: translateY(-1px); }
-        .action-button:focus-visible, .key:focus-visible { outline: 2px solid #f0caff; outline-offset: 2px; }
-        .hidden { display: none !important; }
-
-        .keyboard {
-            position: fixed;
-            z-index: 2;
-            right: 0;
-            bottom: max(10px, env(safe-area-inset-bottom));
-            left: 0;
-            display: flex;
-            width: min(100%, 680px);
-            flex-direction: column;
-            gap: clamp(5px, 1.6vw, 9px);
-            margin-inline: auto;
-            padding: 8px clamp(5px, 2vw, 12px);
-            user-select: none;
-        }
-
-        .keyboard-row {
-            display: flex;
-            justify-content: center;
-            gap: clamp(3px, .9vw, 7px);
-        }
-
-        .key {
-            display: flex;
-            min-width: 0;
-            min-height: clamp(42px, 10vw, 54px);
-            flex: 1 1 0;
-            align-items: center;
-            justify-content: center;
-            padding: 0 clamp(2px, .8vw, 8px);
-            border: 1px solid rgba(255,255,255,.13);
-            border-radius: 6px;
-            color: #fff;
-            background: rgba(52, 49, 59, .94);
-            font-size: clamp(.72rem, 3vw, .95rem);
-            font-weight: 700;
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: filter .12s, background-color .2s, transform .08s;
-        }
-        .key:active { filter: brightness(1.2); transform: scale(.96); }
-        .key[data-state="correct"] { background: var(--correct); border-color: var(--correct); }
-        .key[data-state="present"] { background: var(--present); border-color: var(--present); }
-        .key[data-state="absent"] { background: var(--absent); border-color: var(--absent); }
-        .key.action-key {
-            flex: 1.55 1 0;
-            background: rgba(102, 83, 117, .96);
-            font-size: clamp(.62rem, 2.6vw, .82rem);
-        }
-        .key.action-key svg { width: 22px; height: 22px; }
-
-        .tutorial-backdrop {
-            position: fixed;
-            z-index: 5;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            padding: 18px;
-            background: rgba(4, 3, 8, .72);
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
-        }
-
-        .tutorial {
-            width: min(100%, 480px);
-            padding: clamp(22px, 6vw, 34px);
-            border: 1px solid rgba(206, 139, 255, .88);
-            border-radius: 20px;
-            background: linear-gradient(145deg, rgba(41, 28, 52, .88), rgba(18, 15, 25, .82));
-            box-shadow: 0 0 14px rgba(177, 89, 230, .55), 0 0 48px rgba(143, 62, 191, .24), inset 0 1px rgba(255,255,255,.12);
-            text-align: center;
-        }
-
-        .tutorial h2 {
-            margin: 0 0 11px;
-            color: #e4bdff;
-            font-size: clamp(1.45rem, 6vw, 1.9rem);
-            text-shadow: 0 0 12px var(--accent-glow);
-        }
-        .tutorial p { margin: 0 0 18px; color: var(--muted); line-height: 1.55; }
-        .rules { margin: 0 0 20px; padding: 0; list-style: none; text-align: left; }
-        .rules li { display: flex; gap: 11px; align-items: flex-start; margin: 11px 0; color: #f1edf5; line-height: 1.4; }
-        .rule-color { width: 17px; height: 17px; flex: 0 0 17px; margin-top: 1px; border-radius: 4px; }
-        .rule-color.correct { background: var(--correct); }
-        .rule-color.present { background: var(--present); }
-        .rule-color.absent { background: var(--absent); }
-
-        @media (max-height: 650px) and (min-width: 600px) {
-            .app { justify-content: flex-start; padding-top: 10px; padding-bottom: 170px; }
-            h1 { font-size: 1.8rem; }
-            #game-board { width: min(100%, 320px); }
-            .tile { font-size: 1.65rem; }
-            .keyboard { gap: 5px; }
-            .key { min-height: 42px; }
-        }
-
-        @media (max-width: 380px) {
-            .app { padding-right: 7px; padding-left: 7px; }
-            #game-board { width: 100%; }
-            .keyboard { padding-right: 4px; padding-left: 4px; }
-            .key.action-key { flex-grow: 1.35; }
-        }
-    </style>
+    <title>AcheronEX</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <video id="background-video" autoplay loop muted playsinline aria-hidden="true">
@@ -257,11 +14,13 @@
     <div class="video-shade" aria-hidden="true"></div>
 
     <main class="app">
-        <h1>Palabra EX</h1>
+        <button id="stats-btn" class="stats-button" type="button" aria-label="Ver estad&#237;sticas" aria-haspopup="dialog" aria-controls="stats-backdrop">&#128202; Estad&#237;sticas</button>
+        <h1>AcheronEX</h1>
         <p class="subtitle">Adivina la palabra de 5 letras</p>
         <div id="message-container" role="status" aria-live="polite"></div>
         <div id="game-board" aria-label="Tablero de seis intentos"></div>
         <button id="reset-btn" class="action-button hidden" type="button">Jugar otra vez</button>
+        <button id="share-btn" class="action-button hidden" type="button">Compartir Resultado</button>
     </main>
 
     <section id="keyboard" class="keyboard" aria-label="Teclado virtual">
@@ -272,260 +31,32 @@
 
     <div id="tutorial-backdrop" class="tutorial-backdrop" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
         <div class="tutorial">
-            <h2 id="tutorial-title">¡Cómo jugar!</h2>
+            <h2 id="tutorial-title">&iexcl;C&oacute;mo jugar!</h2>
             <p>Tienes seis intentos para descubrir la palabra secreta de cinco letras.</p>
             <ul class="rules">
                 <li><span class="rule-color correct" aria-hidden="true"></span><span><strong>Verde:</strong> letra correcta en el lugar correcto.</span></li>
-                <li><span class="rule-color present" aria-hidden="true"></span><span><strong>Amarillo:</strong> la letra está en la palabra, pero en otro lugar.</span></li>
+                <li><span class="rule-color present" aria-hidden="true"></span><span><strong>Amarillo:</strong> la letra est&aacute; en la palabra, pero en otro lugar.</span></li>
                 <li><span class="rule-color absent" aria-hidden="true"></span><span><strong>Rojo:</strong> esa letra no aparece en la palabra.</span></li>
             </ul>
-            <button id="start-btn" class="action-button" type="button">¡Entendido, a jugar!</button>
+            <button id="start-btn" class="action-button" type="button">&iexcl;Entendido, a jugar!</button>
         </div>
     </div>
 
-    <script>
-        'use strict';
+    <div id="stats-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="stats-title" aria-describedby="stats-description">
+        <section class="stats-modal">
+            <button id="close-stats-btn" class="modal-close" type="button" aria-label="Cerrar estad&#237;sticas">&times;</button>
+            <h2 id="stats-title">Estad&#237;sticas</h2>
+            <p id="stats-description" class="stats-description">Tu progreso en AcheronEX</p>
+            <div class="stats-grid">
+                <div class="stat-card"><strong id="stats-played" class="stat-value">0</strong><span class="stat-label">Partidas jugadas</span></div>
+                <div class="stat-card"><strong id="stats-won" class="stat-value">0</strong><span class="stat-label">Partidas ganadas</span></div>
+                <div class="stat-card"><strong id="stats-current-streak" class="stat-value">0</strong><span class="stat-label">Racha actual</span></div>
+                <div class="stat-card"><strong id="stats-max-streak" class="stat-value">0</strong><span class="stat-label">Racha m&#225;xima</span></div>
+            </div>
+            <button class="action-button" type="button" id="done-stats-btn">Cerrar</button>
+        </section>
+    </div>
 
-        const WORDS = [
-            'SABLE', 'LUCES', 'MUNDO', 'FUEGO', 'NIEVE', 'CIELO', 'PIANO',
-            'LIBRO', 'PERRO', 'GATOS', 'VERDE', 'NEGRO', 'TECHO', 'CAMPO'
-        ];
-        const WORD_LENGTH = 5;
-        const MAX_TRIES = 6;
-        const KEY_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
-        const KEY_PRIORITY = { absent: 1, present: 2, correct: 3 };
-
-        let currentWord = '';
-        let currentRow = 0;
-        let currentTile = 0;
-        let isGameOver = false;
-        let gameStarted = false;
-        let messageTimer = null;
-        const keyStates = new Map();
-
-        const board = document.getElementById('game-board');
-        const msgContainer = document.getElementById('message-container');
-        const resetBtn = document.getElementById('reset-btn');
-        const startBtn = document.getElementById('start-btn');
-        const tutorial = document.getElementById('tutorial-backdrop');
-        const virtualKeyboard = document.getElementById('keyboard');
-
-        function initGame() {
-            currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-            currentRow = 0;
-            currentTile = 0;
-            isGameOver = false;
-            keyStates.clear();
-            clearTimeout(messageTimer);
-            msgContainer.textContent = '';
-            resetBtn.classList.add('hidden');
-            board.replaceChildren();
-            buildKeyboard();
-
-            for (let rowIndex = 0; rowIndex < MAX_TRIES; rowIndex++) {
-                const row = document.createElement('div');
-                row.className = 'row';
-                row.setAttribute('role', 'group');
-                row.setAttribute('aria-label', `Intento ${rowIndex + 1}`);
-
-                for (let column = 0; column < WORD_LENGTH; column++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'tile';
-                    tile.id = `tile-${rowIndex}-${column}`;
-                    tile.dataset.row = String(rowIndex);
-                    tile.dataset.column = String(column);
-                    tile.setAttribute('aria-label', `Intento ${rowIndex + 1}, casilla ${column + 1}`);
-                    row.appendChild(tile);
-                }
-                board.appendChild(row);
-            }
-
-            updateActiveTile();
-        }
-
-        function buildKeyboard() {
-            virtualKeyboard.querySelectorAll('.keyboard-row').forEach(row => row.replaceChildren());
-            KEY_ROWS.forEach((letters, rowIndex) => {
-                const row = virtualKeyboard.querySelector(`[data-key-row="${rowIndex + 1}"]`);
-                if (rowIndex === 2) row.appendChild(createActionKey('ENTER', 'ENTER'));
-                for (const letter of letters) row.appendChild(createLetterKey(letter));
-                if (rowIndex === 2) row.appendChild(createActionKey('BACKSPACE', '⌫'));
-            });
-        }
-
-        function createLetterKey(letter) {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'key';
-            button.dataset.key = letter;
-            button.textContent = letter;
-            button.setAttribute('aria-label', letter);
-            if (keyStates.has(letter)) button.dataset.state = keyStates.get(letter);
-            return button;
-        }
-
-        function createActionKey(action, label) {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'key action-key';
-            button.dataset.key = action;
-            if (action === 'BACKSPACE') {
-                button.setAttribute('aria-label', 'Borrar letra');
-                button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5H20V19H9L3 12L9 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9L17 15M17 9L12 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-            } else {
-                button.setAttribute('aria-label', 'Enter, confirmar palabra');
-                button.textContent = label;
-            }
-            return button;
-        }
-
-        function updateActiveTile() {
-            board.querySelectorAll('.tile').forEach(tile => {
-                tile.removeAttribute('data-row-active');
-                if (tile.dataset.row === String(currentRow)) tile.dataset.rowActive = 'true';
-                if (tile.dataset.row === String(currentRow) && Number(tile.dataset.column) === currentTile && currentTile < WORD_LENGTH) {
-                    tile.dataset.state = 'active';
-                } else if (tile.dataset.state === 'active') {
-                    tile.removeAttribute('data-state');
-                }
-            });
-        }
-
-        function handleInput(key) {
-            if (!gameStarted || isGameOver) return;
-
-            if (key === 'ENTER') {
-                if (currentTile === WORD_LENGTH) checkWord();
-                else showMessage('La palabra debe tener 5 letras.');
-                return;
-            }
-
-            if (key === 'BACKSPACE') {
-                if (currentTile > 0) {
-                    currentTile--;
-                    const tile = getTile(currentRow, currentTile);
-                    tile.textContent = '';
-                    tile.removeAttribute('data-state');
-                    updateActiveTile();
-                }
-                return;
-            }
-
-            if (/^[A-Z]$/.test(key) && currentTile < WORD_LENGTH) {
-                const tile = getTile(currentRow, currentTile);
-                tile.textContent = key;
-                tile.removeAttribute('data-state');
-                currentTile++;
-                updateActiveTile();
-            }
-        }
-
-        function getTile(row, column) {
-            return document.getElementById(`tile-${row}-${column}`);
-        }
-
-        function editFromTile(tile) {
-            if (!gameStarted || isGameOver || Number(tile.dataset.row) !== currentRow) return;
-            const clickedColumn = Number(tile.dataset.column);
-            for (let column = clickedColumn; column < WORD_LENGTH; column++) {
-                const target = getTile(currentRow, column);
-                target.textContent = '';
-                target.removeAttribute('data-state');
-            }
-            currentTile = clickedColumn;
-            updateActiveTile();
-        }
-
-        function checkWord() {
-            const guess = Array.from({ length: WORD_LENGTH }, (_, column) => getTile(currentRow, column).textContent).join('');
-            const remainingLetters = currentWord.split('');
-            const results = Array(WORD_LENGTH).fill('absent');
-
-            // Primero se marcan coincidencias exactas para contar bien las letras repetidas.
-            for (let index = 0; index < WORD_LENGTH; index++) {
-                if (guess[index] === currentWord[index]) {
-                    results[index] = 'correct';
-                    remainingLetters[index] = null;
-                }
-            }
-
-            for (let index = 0; index < WORD_LENGTH; index++) {
-                if (results[index] === 'correct') continue;
-                const matchingIndex = remainingLetters.indexOf(guess[index]);
-                if (matchingIndex !== -1) {
-                    results[index] = 'present';
-                    remainingLetters[matchingIndex] = null;
-                }
-            }
-
-            for (let index = 0; index < WORD_LENGTH; index++) {
-                const tile = getTile(currentRow, index);
-                tile.dataset.state = results[index];
-                tile.removeAttribute('data-row-active');
-                updateKeyColor(guess[index], results[index]);
-            }
-
-            if (guess === currentWord) {
-                endGame('¡Excelente! Has acertado.');
-            } else if (currentRow === MAX_TRIES - 1) {
-                endGame(`Fin del juego. La palabra era: ${currentWord}.`);
-            } else {
-                currentRow++;
-                currentTile = 0;
-                updateActiveTile();
-            }
-        }
-
-        function updateKeyColor(letter, state) {
-            const currentState = keyStates.get(letter);
-            if (!currentState || KEY_PRIORITY[state] > KEY_PRIORITY[currentState]) keyStates.set(letter, state);
-            const key = virtualKeyboard.querySelector(`[data-key="${letter}"]`);
-            if (key) key.dataset.state = keyStates.get(letter);
-        }
-
-        function endGame(message) {
-            isGameOver = true;
-            showMessage(message, true);
-            resetBtn.classList.remove('hidden');
-        }
-
-        function showMessage(message, persistent = false) {
-            clearTimeout(messageTimer);
-            msgContainer.textContent = message;
-            if (!persistent) {
-                messageTimer = setTimeout(() => {
-                    if (!isGameOver) msgContainer.textContent = '';
-                }, 2500);
-            }
-        }
-
-        startBtn.addEventListener('click', () => {
-            tutorial.classList.add('hidden');
-            gameStarted = true;
-            updateActiveTile();
-        });
-
-        resetBtn.addEventListener('click', initGame);
-
-        board.addEventListener('click', event => {
-            const tile = event.target.closest('.tile');
-            if (tile) editFromTile(tile);
-        });
-
-        virtualKeyboard.addEventListener('click', event => {
-            const keyButton = event.target.closest('[data-key]');
-            if (keyButton) handleInput(keyButton.dataset.key);
-        });
-
-        document.addEventListener('keydown', event => {
-            const key = event.key.toUpperCase();
-            if (key === 'ENTER' || key === 'BACKSPACE' || /^[A-Z]$/.test(key)) {
-                if (gameStarted) event.preventDefault();
-                handleInput(key);
-            }
-        });
-
-        initGame();
-    </script>
+    <script src="script.js" defer></script>
 </body>
 </html>
